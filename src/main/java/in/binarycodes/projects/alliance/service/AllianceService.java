@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import in.binarycodes.projects.alliance.bean.Alliance;
+import in.binarycodes.projects.alliance.util.AllianceWebClient;
 import in.binarycodes.projects.alliance.util.AllianceXPATH;
 
 public class AllianceService {
@@ -25,10 +25,7 @@ public class AllianceService {
 
 	public boolean login(final String userName, final String password) {
 		boolean status = false;
-		final WebClient client = new WebClient();
-		client.getOptions().setCssEnabled(false);
-		client.getOptions().setJavaScriptEnabled(false);
-		try {
+		try (final AllianceWebClient client = new AllianceWebClient()) {
 			final HtmlPage page = client.getPage(this.url);
 			AllianceXPATH.LOGIN_USER_NAME.setXpathValue(page, userName);
 			AllianceXPATH.LOGIN_PASSWORD.setXpathValue(page, password);
@@ -36,25 +33,18 @@ public class AllianceService {
 			status = true;
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			e.printStackTrace();
-		} finally {
-			client.close();
 		}
 		return status;
 	}
 
 	public boolean logout() {
 		boolean status = false;
-		final WebClient client = new WebClient();
-		client.getOptions().setCssEnabled(false);
-		client.getOptions().setJavaScriptEnabled(false);
-		try {
+		try (final AllianceWebClient client = new AllianceWebClient()) {
 			final HtmlPage page = client.getPage(this.url);
 			AllianceXPATH.LOGOUT_BUTTON.clickXpath(page);
 			status = true;
 		} catch (FailingHttpStatusCodeException | IOException e) {
 			e.printStackTrace();
-		} finally {
-			client.close();
 		}
 		return status;
 	}
@@ -62,10 +52,7 @@ public class AllianceService {
 	public Alliance fetchUserData() {
 		final Alliance alliance = new Alliance();
 
-		final WebClient client = new WebClient();
-		client.getOptions().setCssEnabled(false);
-		client.getOptions().setJavaScriptEnabled(false);
-		try {
+		try (final AllianceWebClient client = new AllianceWebClient()) {
 			final HtmlPage page = client.getPage(this.url);
 			alliance.setUserName(AllianceXPATH.USER_NAME.getXpathText(page));
 			alliance.setClientId(AllianceXPATH.CLIENT_ID.getXpathText(page));
@@ -73,8 +60,6 @@ public class AllianceService {
 			alliance.setExpiryDate(AllianceXPATH.EXPIRY_DATE.getXpathLocalDate(page, "MM.dd.yyyy"));
 		} catch (final FailingHttpStatusCodeException | IOException e) {
 			e.printStackTrace();
-		} finally {
-			client.close();
 		}
 		return alliance;
 	}
